@@ -91,7 +91,7 @@ class InletsConfig:
 
     @classmethod
     def get_cmd(cls):
-        cmd = f'inlets-pro {cls.client_type} client --url {cls.tunnel_url}' 
+        cmd = f'inlets-pro {cls.client_type} client --url={cls.tunnel_url}' 
         if cls.is_cluster:
             cmd += f' --upstream={cls.upstream} --port={cls.upstream_port} --auto-tls=false'
         else: 
@@ -220,7 +220,7 @@ class ServerConfig:
     def get_codeserver_cmd(cls):
         password = cls.get_code_password()
         if password: return f"code-server --bind-addr='{cls.host}:{cls.port}' --disable-telemetry --password='{password}'"
-        return f"code-server --bind-addr='{cls.host}:{cls.port}' --auth none --disable-telemetry"
+        return f"code-server --bind-addr='{cls.host}:{cls.port}' --auth=none --disable-telemetry"
         
     @classmethod
     def get_cmd(cls):

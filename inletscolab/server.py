@@ -40,9 +40,10 @@ class Server:
         cls.run_startup(**kwargs)
         cmd = ServerConfig.get_cmd()
         logger.info(cmd)
+        ServerConfig.display_info()
         if not background: return cls.run_foreground(cmd)
         cls.run_background(cmd, **kwargs)
-        ServerConfig.display_info()
+        
 
 
 
