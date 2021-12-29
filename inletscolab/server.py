@@ -15,9 +15,9 @@ class Server:
                 print(line, end="")
     
     @classmethod
-    def run_background(cls, cmd: str):
+    def run_background(cls, cmd: str, set_proc_uid: bool = False, **kwargs):
         if cls.d: return
-        cls.d = exec_daemon(cmd=cmd.split(' '))
+        cls.d = exec_daemon(cmd=cmd.split(' '), set_proc_uid=set_proc_uid, **kwargs)
 
     @classmethod
     def kill(cls):
@@ -41,7 +41,7 @@ class Server:
         cmd = ServerConfig.get_cmd()
         logger.info(cmd)
         if not background: return cls.run_foreground(cmd)
-        cls.run_background(cmd)
+        cls.run_background(cmd, **kwargs)
         ServerConfig.display_info()
 
 

@@ -7,6 +7,8 @@ from lazycls.serializers import Base
 from lazycls.utils import find_binary_in_path, exec_shell, exec_run, exec_daemon, subprocess
 from logz import get_cls_logger, get_logger
 
+from inletscolab.inlets import Inlets
+
 try:
     from google.colab import drive
     colab_env = True
@@ -33,6 +35,7 @@ logger = get_logger('inlets-colab')
 class InletsConfig:
     license: str = Env.to_str('INLETS_LICENSE', '')
     token: str = Env.to_str('INLETS_TOKEN', '')
+    tunnel_host: str = Env.to_str('INLETS_TUNNEL_HOST', '')
     server_host: str = Env.to_str('INLETS_SERVER_HOST', '')
     server_port: int = Env.to_int('INLETS_SERVER_PORT', 8123)
     client_host: str = Env.to_str('INLETS_CLIENT_HOST', 'localhost')
@@ -62,11 +65,18 @@ class InletsConfig:
     
     @classproperty
     def tunnel_url(cls):
-        if cls.is_cluster: return f'wss://{cls.server_host}'
+        if cls.is_cluster: return f'wss://{cls.tunnel_host}'
         return f'wss://{cls.server_host}:{cls.server_port}/connect'
     
     @classproperty
-    def upstream(cls): return cls.client_host
+    def public_url(cls):
+        if cls.is_cluster: return f'https://{cls.server_host}'
+        if cls.domain_name: return f'https://{cls.domain_name}'
+        return f'http://{cls.client_host}:{cls.client_port}'
+        
+
+    @classproperty
+    def upstream(cls): return cls.tunnel_host
 
     @classproperty
     def upstream_port(cls): return cls.client_port
@@ -190,6 +200,11 @@ class ServerConfig:
     @classproperty
     def host(cls):
         return InletsConfig.client_host
+    
+    @classproperty
+    def public_url(cls):
+        return InletsConfig.public_url
+
 
     @classmethod
     def get_lab_cmd(cls):
@@ -222,3 +237,6 @@ class ServerConfig:
             msg += "Jupyter Lab"
         msg += f" @ {cls.host}:{cls.port}"
         logger.info(msg)
+        if cls.code:
+            logger.info(f'\n\nCodeServer Available: {cls.public_url}/?folder=/content')
+        
