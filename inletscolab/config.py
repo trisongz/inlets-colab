@@ -35,7 +35,7 @@ class InletsConfig:
     token: str = Env.to_str('INLETS_TOKEN', '')
     server_host: str = Env.to_str('INLETS_SERVER_HOST', '')
     server_port: int = Env.to_int('INLETS_SERVER_PORT', 8123)
-    client_host: str = Env.to_str('INLETS_CLIENT_HOST', '127.0.0.1')
+    client_host: str = Env.to_str('INLETS_CLIENT_HOST', 'localhost')
     client_port: int = Env.to_int('INLETS_CLIENT_PORT', 7070)
     domain_name: str = Env.to_str('INLETS_DOMAIN', 'localhost')
     is_cluster: bool = Env.to_bool('INLETS_CLUSTER', 'true')
@@ -129,7 +129,7 @@ class InletsConfig:
         if cls.is_cluster:
             msg += f" {cls.server_host}"
         else: msg+= f" {cls.domain_name}"
-        msg += f"Listening to: http://{cls.client_host}:{cls.client_port}"
+        msg += f". Listening to: http://{cls.client_host}:{cls.client_port}"
         logger.info(msg)
 
 
