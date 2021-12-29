@@ -49,7 +49,7 @@ class InletsConfig:
 
     @classproperty
     def inlets_dir(cls):
-        return Path.get_user_path('.inlets', True)
+        return Path.get_path('/content/.inlets', True)
 
     @classproperty
     def lincense_file(cls):
@@ -120,7 +120,7 @@ class InletsConfig:
     @classmethod
     def ensure_inlets(cls, overwrite: bool = False):
         if cls.inlets_exists and not overwrite: return
-        exec_shell(f'cd {bin_dir.string} && sudo bash {_inlets_installer.string}')
+        exec_shell(f'sudo bash {_inlets_installer.string}')
         exec_shell('sudo inletsctl download')
     
     @classmethod
