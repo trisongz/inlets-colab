@@ -15,6 +15,8 @@ except ImportError:
     colab_env = False
 
 
+authz_dir = Path('/authz')
+authz_dir.mkdir(parents=True, exist_ok=True)
 root_dir = Path.get_parent_path(__file__)
 
 bin_dir = root_dir.joinpath('bin')
@@ -53,7 +55,7 @@ class InletsConfig:
 
     @classproperty
     def inlets_dir(cls):
-        return Path.get_path('/authz/.inlets', True)
+        return authz_dir.joinpath('.inlets', True)
 
     @classproperty
     def lincense_file(cls):
@@ -339,8 +341,13 @@ class StorageConfig:
         if kwargs: cls.update_config(**kwargs)
         cls.write_envfile()
         cls.mount_gdrive()
-        logger.info(f'Setting up Storage. This may take a while...')
-        exec_shell(f'sudo bash {cls.envfile.string}')
+        if cls.has_mounts:
+            logger.info(f'Setting up Storage. This may take a while...')
+            exec_shell(f'sudo bash {cls.envfile.string}')
+    
+    @classproperty
+    def has_mounts(cls):
+        return any(cls.mount_gs, cls.mount_s3, cls.mount_minio)
     
     @classproperty
     def envfile(cls): return scripts_dir.joinpath('load_env.sh')
