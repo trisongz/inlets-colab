@@ -15,7 +15,7 @@ except ImportError:
     colab_env = False
 
 
-authz_dir = Path.get_path('/authz')
+authz_dir = Path('/authz')
 authz_dir.mkdir(parents=True, exist_ok=True)
 root_dir = Path.get_parent_path(__file__)
 
@@ -55,7 +55,7 @@ class InletsConfig:
 
     @classproperty
     def inlets_dir(cls):
-        return authz_dir.joinpath('.inlets', True)
+        return authz_dir.joinpath('.inlets')
 
     @classproperty
     def lincense_file(cls):
