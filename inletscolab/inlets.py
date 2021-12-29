@@ -18,7 +18,7 @@ class Inlets:
         cls.run_startup(license = license, overwrite_license = overwrite_license, **kwargs)
         cmd = InletsConfig.get_cmd()
         logger.info(cmd)
-        cls.d = exec_daemon(cmd=cmd.split(' '))
+        cls.d = exec_daemon(cmd=cmd.split(' '), set_proc_uid=False)
         InletsConfig.display_info()
     
     @classmethod

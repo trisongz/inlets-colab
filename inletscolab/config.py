@@ -75,7 +75,7 @@ class InletsConfig:
         
 
     @classproperty
-    def upstream(cls): return cls.tunnel_host
+    def upstream(cls): return cls.client_host
 
     @classproperty
     def upstream_port(cls): return cls.client_port
