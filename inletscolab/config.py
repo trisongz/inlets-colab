@@ -257,7 +257,8 @@ class ServerConfig:
 
     @classmethod
     def get_codeserver_cmd(cls):
-        cls.password = cls.get_code_password()
+        password = cls.get_code_password()
+        if password: cls.password
         return f'bash {cls.cs_exec_script.string} "{cls.host}:{cls.port}" "{cls.password}"'
         
     @classmethod
@@ -343,7 +344,7 @@ class StorageConfig:
         cls.mount_gdrive()
         if cls.has_mounts:
             logger.info(f'Setting up Storage. This may take a while...')
-            exec_shell(f'sudo bash {cls.envfile.string}')
+            exec_shell(f'sudo bash {cls.storage_exec_script.string}')
     
     @classproperty
     def has_mounts(cls):
@@ -351,6 +352,9 @@ class StorageConfig:
     
     @classproperty
     def envfile(cls): return scripts_dir.joinpath('load_env.sh')
+    
+    @classproperty
+    def storage_exec_script(cls): return scripts_dir.joinpath('setup_storage.sh')
     
     @classproperty
     def s3_endpoint(cls): return f'https://s3.{cls.s3_region}.amazonaws.com'
@@ -386,32 +390,32 @@ class StorageConfig:
     @classmethod
     def get_envfile_values(cls):
         t = f"""
-        #!/bin/bash
-        
-        ## This is the file used to load the envs
-        
-        export MOUNT_DRIVE={cls.mount_drive}
-        export MOUNT_S3={cls.mount_s3}
-        export MOUNT_GS={cls.mount_gs}
-        export MOUNT_MINIO={cls.mount_minio}
-        
-        export S3_BUCKET={cls.s3_bucket}
-        export S3_MOUNT_PATH={cls.s3_mount_path}
-        export AWS_ACCESS_KEY_ID={cls.s3_key_id}
-        export AWS_SECRET_ACCESS_KEY={cls.s3_secret}
-        export AWS_REGION={cls.s3_region}
-        export S3_ENDPOINT={cls.s3_endpoint}
-        
-        export GOOGLE_APPLICATION_CREDENTIALS={cls.gauth.as_posix()}
-        export GS_BUCKET={cls.gs_bucket}
-        export GS_MOUNT_PATH={cls.gs_mount_path}
-        
-        export MINIO_BUCKET={cls.minio_bucket}
-        export MINIO_MOUNT_PATH={cls.minio_mount_path}
-        export MINIO_ENDPOINT={cls.minio_endpoint}
-        export MINIO_ACCESS_KEY={cls.minio_key_id}
-        export MINIO_SECRET_KEY={cls.minio_secret}
-        """
+#!/bin/bash
+
+## This is the file used to load the envs
+
+export MOUNT_DRIVE={cls.mount_drive}
+export MOUNT_S3={cls.mount_s3}
+export MOUNT_GS={cls.mount_gs}
+export MOUNT_MINIO={cls.mount_minio}
+
+export S3_BUCKET={cls.s3_bucket}
+export S3_MOUNT_PATH={cls.s3_mount_path}
+export AWS_ACCESS_KEY_ID={cls.s3_key_id}
+export AWS_SECRET_ACCESS_KEY={cls.s3_secret}
+export AWS_REGION={cls.s3_region}
+export S3_ENDPOINT={cls.s3_endpoint}
+
+export GOOGLE_APPLICATION_CREDENTIALS={cls.gauth.as_posix()}
+export GS_BUCKET={cls.gs_bucket}
+export GS_MOUNT_PATH={cls.gs_mount_path}
+
+export MINIO_BUCKET={cls.minio_bucket}
+export MINIO_MOUNT_PATH={cls.minio_mount_path}
+export MINIO_ENDPOINT={cls.minio_endpoint}
+export MINIO_ACCESS_KEY={cls.minio_key_id}
+export MINIO_SECRET_KEY={cls.minio_secret}
+"""
         return t
     
     @classmethod
