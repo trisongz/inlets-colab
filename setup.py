@@ -10,7 +10,7 @@ if sys.version_info.major != 3:
 
 
 version = '0.0.0a'
-pkg_name = 'inlets-colab'
+pkg_name = 'inletscolab'
 gitrepo = 'trisongz/inlets-colab'
 root = Path(__file__).parent
 
@@ -22,7 +22,7 @@ requirements = [
 ]
 
 args = {
-    'packages': find_packages(include = ['inlets-colab', 'inlets-colab.*']),
+    'packages': find_packages(include = ['inletscolab', 'inletscolab.*']),
     'install_requires': requirements,
     'long_description': root.joinpath('README.md').read_text(encoding='utf-8'),
     'python_requires': '>=3.7',
