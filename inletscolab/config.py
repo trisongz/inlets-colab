@@ -2,7 +2,7 @@ from uuid import uuid1
 from lazycls.envs import Env
 from lazycls.prop import classproperty
 from lazycls.types import *
-from lazycls.io import Path
+from lazycls.io import Path, PathLike
 from lazycls.serializers import Base
 from lazycls.utils import find_binary_in_path, exec_shell, exec_run, exec_daemon, subprocess
 from logz import get_cls_logger, get_logger
@@ -317,7 +317,7 @@ class StorageConfig:
     minio_mount_path: str = Env.to_str('MINIO_MOUNT_PATH', '/content/minio')
     ## Auths
     ### GCP
-    gauth: Type(Path) = Env.to_json('GS_AUTH', 'GOOGLE_APPLICATION_CREDENTIALS', '/authz/adc.json')
+    gauth: PathLike = Env.to_json('GS_AUTH', 'GOOGLE_APPLICATION_CREDENTIALS', '/authz/adc.json')
     ### AWS
     s3_key_id: str = Env.to_str_env('AWS_KEYID', 'AWS_ACCESS_KEY_ID', '')
     s3_secret: str = Env.to_str_env('AWS_SECRET', 'AWS_SECRET_ACCESS_KEY', '')
