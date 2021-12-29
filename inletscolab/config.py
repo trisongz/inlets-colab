@@ -205,8 +205,8 @@ class ServerConfig:
     @classmethod
     def get_codeserver_cmd(cls):
         password = cls.get_code_password()
-        if password: return f"PASSWORD={password} code-server --bind-addr={cls.host}:{cls.port} --disable-telemetry"
-        return f"code-server --bind-addr={cls.host}:{cls.port} --auth none --disable-telemetry"
+        if password: return f"code-server --bind-addr='{cls.host}:{cls.port}' --disable-telemetry --password='{password}'"
+        return f"code-server --bind-addr='{cls.host}:{cls.port}' --auth none --disable-telemetry"
         
     @classmethod
     def get_cmd(cls):
