@@ -17,7 +17,7 @@ class Server:
     @classmethod
     def run_background(cls, cmd: str):
         if cls.d: return
-        cls.d = exec_daemon(cmd=cmd)
+        cls.d = exec_daemon(cmd=cmd.split(' '))
 
     @classmethod
     def kill(cls):
