@@ -15,7 +15,7 @@ except ImportError:
     colab_env = False
 
 
-authz_dir = Path('/authz')
+authz_dir = Path.get_path('/authz')
 authz_dir.mkdir(parents=True, exist_ok=True)
 root_dir = Path.get_parent_path(__file__)
 
