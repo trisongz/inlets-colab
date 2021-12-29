@@ -186,10 +186,14 @@ class ServerConfig:
     @classproperty
     def port(cls):
         return InletsConfig.client_port
+    
+    @classproperty
+    def host(cls):
+        return InletsConfig.client_host
 
     @classmethod
     def get_lab_cmd(cls):
-        cmd = "jupyter-lab --ip='localhost' --allow-root --ServerApp.allow_remote_access=True --no-browser"
+        cmd = f"jupyter-lab --ip='{cls.host}' --allow-root --ServerApp.allow_remote_access=True --no-browser"
         token = cls.get_lab_token()
         password = cls.get_lab_password()
         if password:
@@ -201,8 +205,8 @@ class ServerConfig:
     @classmethod
     def get_codeserver_cmd(cls):
         password = cls.get_code_password()
-        if password: return f"PASSWORD={password} code-server --port {cls.port} --disable-telemetry"
-        return f"code-server --port {cls.port} --auth none --disable-telemetry"
+        if password: return f"PASSWORD={password} code-server --bind-addr {cls.host}:{cls.port} --disable-telemetry"
+        return f"code-server --bind-addr {cls.host}:{cls.port} --auth none --disable-telemetry"
         
     @classmethod
     def get_cmd(cls):
@@ -216,5 +220,5 @@ class ServerConfig:
             msg += "Code Server"
         elif cls.lab:
             msg += "Jupyter Lab"
-        msg += f" @ localhost:{cls.port}"
+        msg += f" @ {cls.host}:{cls.port}"
         logger.info(msg)
