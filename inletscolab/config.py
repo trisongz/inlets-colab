@@ -7,7 +7,6 @@ from lazycls.serializers import Base
 from lazycls.utils import find_binary_in_path, exec_shell, exec_run, exec_daemon, subprocess
 from logz import get_cls_logger, get_logger
 
-from inletscolab.inlets import Inlets
 
 try:
     from google.colab import drive
