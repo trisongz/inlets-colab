@@ -1,4 +1,4 @@
-from .config import ServerConfig, logger
+from .config import ServerConfig, logger, DebugEnabled
 from lazycls.utils import exec_shell, exec_run, exec_daemon, subprocess
 from lazycls.prop import classproperty
 
@@ -39,7 +39,7 @@ class Server:
     def run_server(cls, background: bool = True, **kwargs):
         cls.run_startup(**kwargs)
         cmd = ServerConfig.get_cmd()
-        logger.info(cmd)
+        if DebugEnabled: logger.info(cmd)
         ServerConfig.display_info()
         if not background: return cls.run_foreground(cmd)
         cls.run_background(cmd, **kwargs)

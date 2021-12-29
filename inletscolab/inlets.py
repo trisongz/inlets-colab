@@ -1,4 +1,4 @@
-from .config import InletsConfig, logger
+from .config import InletsConfig, logger, DebugEnabled
 from lazycls.utils import exec_shell, exec_run, exec_daemon, subprocess
 from lazycls.prop import classproperty
 
@@ -17,7 +17,7 @@ class Inlets:
         cls.svc = False
         cls.run_startup(license = license, overwrite_license = overwrite_license, **kwargs)
         cmd = InletsConfig.get_cmd()
-        logger.info(cmd)
+        if DebugEnabled: logger.info(cmd)
         cls.d = exec_daemon(cmd=cmd.split(' '), set_proc_uid=False)
         InletsConfig.display_info()
     
@@ -33,7 +33,7 @@ class Inlets:
         if InletsConfig.systemd_path.exists() and not overwrite: return
         cmd = InletsConfig.get_cmd()
         cmd += f" --generate systemd > {InletsConfig.systemd_path.string}"
-        logger.info(cmd)
+        if DebugEnabled: logger.info(cmd)
         exec_shell(cmd)
     
     @classmethod
@@ -41,7 +41,7 @@ class Inlets:
         if not InletsConfig.systemd_path.exists(): return
         cmd = f'systemctl {cmd} inlets'
         if InletsConfig.use_sudo: cmd = 'sudo ' + cmd
-        logger.info(cmd)
+        if DebugEnabled: logger.info(cmd)
         exec_shell(cmd)
     
     @classmethod

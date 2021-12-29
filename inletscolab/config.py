@@ -31,6 +31,8 @@ CSDefaultVersion = "3.10.2"
 
 logger = get_logger('inlets-colab')
 
+DebugEnabled: bool = Env.to_bool('DEBUG_ENABLED')
+
 class InletsConfig:
     license: str = Env.to_str('INLETS_LICENSE', '')
     token: str = Env.to_str('INLETS_TOKEN', '')
@@ -129,16 +131,17 @@ class InletsConfig:
     @classmethod
     def ensure_inlets(cls, overwrite: bool = False):
         if cls.inlets_exists and not overwrite: return
+        logger.info(f'Setting up Inlets. This will take a moment.')
         exec_shell(f'sudo bash {_inlets_installer.string}')
         exec_shell('sudo inletsctl download')
     
     @classmethod
     def display_info(cls):
-        msg = "Inlets Client is Running at:\n"
+        msg = "\n\nInlets Client is Running at:\n"
         if cls.is_cluster:
             msg += f" {cls.server_host}"
         else: msg+= f" {cls.domain_name}"
-        msg += f". Listening to: http://{cls.client_host}:{cls.client_port}"
+        msg += f". Listening to: http://{cls.client_host}:{cls.client_port}\n\n"
         logger.info(msg)
 
 
@@ -169,6 +172,7 @@ class ServerConfig:
     @classmethod
     def ensure_codeserver(cls):
         if cls.cs_exists or not cls.is_colab: return
+        logger.info(f'Setting up CodeServer ver. {cls.version}')
         exec_shell(f'sudo bash {_cs_installer.string} --version {cls.version}')
         for ext in cls.extensions:
             exec_shell(f'code-server --install-extension {ext}')
@@ -210,10 +214,8 @@ class ServerConfig:
         cmd = f"jupyter-lab --ip='{cls.host}' --allow-root --ServerApp.allow_remote_access=True --no-browser"
         token = cls.get_lab_token()
         password = cls.get_lab_password()
-        if password:
-            cmd += f" --ServerApp.token='{token}' --ServerApp.password='{password}' --port={cls.port}"
-        else:
-            cmd += f" --ServerApp.token='{token}' --ServerApp.password='' --port={cls.port}"
+        if password: cmd += f" --ServerApp.token='{token}' --ServerApp.password='{password}' --port={cls.port}"
+        else: cmd += f" --ServerApp.token='{token}' --ServerApp.password='' --port={cls.port}"
         return cmd
 
     @classmethod
@@ -230,12 +232,9 @@ class ServerConfig:
     @classmethod
     def display_info(cls):
         msg = "Running: "
-        if cls.code:
-            msg += "Code Server"
-        elif cls.lab:
-            msg += "Jupyter Lab"
+        if cls.code: msg += "Code Server"
+        elif cls.lab: msg += "Jupyter Lab"
         msg += f" @ {cls.host}:{cls.port}"
         logger.info(msg)
-        if cls.code:
-            logger.info(f'\n\nCodeServer Available: {cls.public_url}/?folder=/content')
+        if cls.code: logger.info(f'\n\nYour CodeServer is Available Here: {cls.public_url}/?folder=/content\n\n')
         
