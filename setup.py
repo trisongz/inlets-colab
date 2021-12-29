@@ -17,6 +17,8 @@ root = Path(__file__).parent
 requirements = [
     'lazycls',
     'pylogz',
+    'uvicorn',
+    'nest_asyncio',
 ]
 
 args = {
