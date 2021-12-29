@@ -34,7 +34,7 @@ start_redis() {
     if [[ "$testRedis" != "PONG" ]]; then
         echo "Starting Redis Server"
         cd /content/cache/redis
-        nohup redis-server "$REDIS_CONFIG" &
+        nohup redis-server "$REDIS_CONFIG" &> /dev/null
     fi
 }
 
