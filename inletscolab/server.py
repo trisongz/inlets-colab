@@ -39,6 +39,7 @@ class Server:
     def run_server(cls, background: bool = True, **kwargs):
         cls.run_startup(**kwargs)
         cmd = ServerConfig.get_cmd()
+        logger.info(cmd)
         if not background: return cls.run_foreground(cmd)
         cls.run_background(cmd)
         ServerConfig.display_info()

@@ -17,6 +17,7 @@ class Inlets:
         cls.svc = False
         cls.run_startup(license = license, overwrite_license = overwrite_license, **kwargs)
         cmd = InletsConfig.get_cmd()
+        logger.info(cmd)
         cls.d = exec_daemon(cmd=cmd)
         InletsConfig.display_info()
     
@@ -32,6 +33,7 @@ class Inlets:
         if InletsConfig.systemd_path.exists() and not overwrite: return
         cmd = InletsConfig.get_cmd()
         cmd += f" --generate systemd > {InletsConfig.systemd_path.string}"
+        logger.info(cmd)
         exec_shell(cmd)
     
     @classmethod
@@ -39,6 +41,7 @@ class Inlets:
         if not InletsConfig.systemd_path.exists(): return
         cmd = f'systemctl {cmd} inlets'
         if InletsConfig.use_sudo: cmd = 'sudo ' + cmd
+        logger.info(cmd)
         exec_shell(cmd)
     
     @classmethod
