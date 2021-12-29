@@ -26,8 +26,8 @@ _inlets_exec = user_exec_dir.joinpath('inletsctl')
 
 _cs_installer = scripts_dir.joinpath('get_codeserver.sh')
 
-CSDefaultExtensions = ["ms-python.python", "ms-toolsai.jupyter", "mechatroner.rainbow-csv", "vscode-icons-team.vscode-icons"]
-CSDefaultVersion = "3.10.2"
+CSDefaultExtensions = ["ms-python.python", "ms-toolsai.jupyter", "mechatroner.rainbow-csv", "vscode-icons-team.vscode-icons", "tabnine.tabnine-vscode", "almenon.arepl", "kevinrose.vsc-python-indent", "ms-vscode-remote.remote-ssh", "mutantdino.resourcemonitor", "ms-python.vscode-pylance"]
+CSDefaultVersion = "3.12.0"
 
 logger = get_logger('inlets-colab')
 
@@ -53,7 +53,7 @@ class InletsConfig:
 
     @classproperty
     def inlets_dir(cls):
-        return Path.get_path('/content/.inlets', True)
+        return Path.get_path('/authz/.inlets', True)
 
     @classproperty
     def lincense_file(cls):
@@ -94,11 +94,8 @@ class InletsConfig:
     @classmethod
     def get_cmd(cls):
         cmd = f'inlets-pro {cls.client_type} client --url={cls.tunnel_url}' 
-        if cls.is_cluster:
-            cmd += f' --upstream={cls.upstream} --port={cls.upstream_port} --auto-tls=false'
-        else: 
-            cmd += f' --upstream={cls.upstream_url}'
-    
+        if cls.is_cluster: cmd += f' --upstream={cls.upstream} --port={cls.upstream_port} --auto-tls=false'
+        else:  cmd += f' --upstream={cls.upstream_url}'
         if cls.token: cmd += f' --token={cls.token}'
         if cls.license: cmd += f' --license-file={cls.lincense_file.string}'
         if cls.use_sudo: cmd = 'sudo ' + cmd 
@@ -137,24 +134,57 @@ class InletsConfig:
     
     @classmethod
     def display_info(cls):
-        msg = "\n\nInlets Client is Running at:\n"
-        if cls.is_cluster:
-            msg += f" {cls.server_host}"
+        msg = "\n\nInlets Client is Running at: "
+        if cls.is_cluster: msg += f" {cls.server_host}"
         else: msg+= f" {cls.domain_name}"
         msg += f". Listening to: http://{cls.client_host}:{cls.client_port}\n\n"
         logger.info(msg)
+        logger.warn('Setup is not complete until Server is running.')
 
+    @classmethod
+    def export_config(cls):
+        return {
+            'INLETS_LICENSE': cls.license,
+            'INLETS_TOKEN': cls.token,
+            'INLETS_TUNNEL_HOST': cls.tunnel_host,
+            'INLETS_SERVER_HOST': cls.server_host,
+            'INLETS_SERVER_PORT': cls.server_port,
+            'INLETS_CLIENT_HOST': cls.client_host,
+            'INLETS_CLIENT_PORT': cls.client_port,
+            'INLETS_DOMAIN': cls.domain_name,
+            'INLETS_CLIENT_TYPE': cls.client_type,
+            'INLETS_CLUSTER': cls.is_cluster,
+            'INLETS_USE_SUDO': cls.use_sudo        
+        }
+    
+    @classmethod
+    def reload_from_env(cls):
+        logger.info(f'Reloading InletsConfig from Environment')
+        cls.license: str = Env.to_str('INLETS_LICENSE', cls.license)
+        cls.token: str = Env.to_str('INLETS_TOKEN', cls.token)
+        cls.tunnel_host: str = Env.to_str('INLETS_TUNNEL_HOST', cls.tunnel_host)
+        cls.server_host: str = Env.to_str('INLETS_SERVER_HOST', cls.server_host)
+        cls.server_port: int = Env.to_int('INLETS_SERVER_PORT', cls.server_port)
+        cls.client_host: str = Env.to_str('INLETS_CLIENT_HOST', cls.client_host)
+        cls.client_port: int = Env.to_int('INLETS_CLIENT_PORT', cls.client_port)
+        cls.domain_name: str = Env.to_str('INLETS_DOMAIN', cls.domain_name)
+        cls.is_cluster: bool = Env.to_bool('INLETS_CLUSTER') or cls.is_cluster
+        cls.client_type: str = Env.to_str('INLETS_CLIENT_TYPE', cls.client_type)
+        cls.use_sudo: bool = Env.to_bool('INLETS_USE_SUDO') or cls.use_sudo
+        
 
+    
 
 class ServerConfig:
     extensions: List[str] = Env.to_list('CODESERVER_EXTENSIONS', CSDefaultExtensions)
     version: str = Env.to_str('CODESERVER_VERSION', CSDefaultVersion)
     authtoken: str = Env.to_str('SERVER_AUTHTOKEN', '')
     password: str = Env.to_str('SERVER_PASSWORD', '')
-    mount_drive: bool = Env.to_bool('MOUNT_DRIVE')
     code: bool = Env.to_bool('RUN_CODE', 'true')
     lab: bool = Env.to_bool('RUN_LAB')
     generate_auth: bool = Env.to_bool('GENERATE_AUTH', 'true')
+    lab_token: str = None
+    
 
     @classmethod
     def update_config(cls, **kwargs):
@@ -164,6 +194,9 @@ class ServerConfig:
     @classproperty
     def cs_exists(cls):
         return find_binary_in_path('code-server')
+    
+    @classproperty
+    def cs_exec_script(cls): return scripts_dir.joinpath('run_codeserver.sh')
 
     @classproperty
     def is_colab(cls):
@@ -212,17 +245,18 @@ class ServerConfig:
     @classmethod
     def get_lab_cmd(cls):
         cmd = f"jupyter-lab --ip='{cls.host}' --allow-root --ServerApp.allow_remote_access=True --no-browser"
-        token = cls.get_lab_token()
+        cls.token = cls.get_lab_token()
         password = cls.get_lab_password()
-        if password: cmd += f" --ServerApp.token='{token}' --ServerApp.password='{password}' --port={cls.port}"
-        else: cmd += f" --ServerApp.token='{token}' --ServerApp.password='' --port={cls.port}"
+        if password: 
+            cls.password = password
+            cmd += f" --ServerApp.token='{cls.token}' --ServerApp.password='{password}' --port={cls.port}"
+        else: cmd += f" --ServerApp.token='{cls.token}' --ServerApp.password='' --port={cls.port}"
         return cmd
 
     @classmethod
     def get_codeserver_cmd(cls):
-        password = cls.get_code_password()
-        if password: return f"code-server --bind-addr='{cls.host}:{cls.port}' --disable-telemetry --password='{password}'"
-        return f"code-server --bind-addr='{cls.host}:{cls.port}' --auth=none --disable-telemetry"
+        cls.password = cls.get_code_password()
+        return f'bash {cls.cs_exec_script.string} "{cls.host}:{cls.port}" "{cls.password}"'
         
     @classmethod
     def get_cmd(cls):
@@ -232,9 +266,189 @@ class ServerConfig:
     @classmethod
     def display_info(cls):
         msg = "Running: "
-        if cls.code: msg += "Code Server"
-        elif cls.lab: msg += "Jupyter Lab"
+        if cls.code: 
+            msg += f"CodeServer v{cls.version}"
+        elif cls.lab: 
+            msg += "Jupyter Lab"
+            if cls.lab_token: msg += f" Token: {cls.lab_token}"
+        if cls.password: msg += f" Password: {cls.password}"
         msg += f" @ {cls.host}:{cls.port}"
         logger.info(msg)
         if cls.code: logger.info(f'\n\nYour CodeServer is Available Here: {cls.public_url}/?folder=/content\n\n')
+    
+    
+    @classmethod
+    def reload_from_env(cls):
+        logger.info(f'Reloading ServerConfig from Environment')
+        cls.extensions: List[str] = Env.to_list('CODESERVER_EXTENSIONS', cls.extensions)
+        cls.version: str = Env.to_str('CODESERVER_VERSION', cls.version)
+        cls.authtoken: str = Env.to_str('SERVER_AUTHTOKEN', cls.authtoken)
+        cls.password: str = Env.to_str('SERVER_PASSWORD', cls.password)
+        cls.code: bool = Env.to_bool('RUN_CODE') or cls.code
+        cls.lab: bool = Env.to_bool('RUN_LAB') or cls.lab
+        cls.generate_auth: bool = Env.to_bool('GENERATE_AUTH') or cls.generate_auth
+
+    @classmethod
+    def export_config(cls):
+        return {
+            'CODESERVER_EXTENSIONS': cls.extensions,
+            'CODESERVER_VERSION': cls.version,
+            'SERVER_AUTHTOKEN': cls.authtoken,
+            'SERVER_PASSWORD': cls.password,
+            'RUN_CODE': cls.code,
+            'RUN_LAB': cls.lab,
+            'GENERATE_AUTH': cls.generate_auth
+        }
+
+
+
+class StorageConfig:
+    mount_drive: bool = Env.to_bool('MOUNT_DRIVE')
+    mount_s3: bool = Env.to_bool('MOUNT_S3')
+    mount_gs: bool = Env.to_bool('MOUNT_GS')
+    mount_minio: bool = Env.to_bool('MOUNT_MINIO')
+    s3_bucket: str = Env.to_str('S3_BUCKET')
+    gs_bucket: str = Env.to_str('GS_BUCKET')
+    minio_bucket: str = Env.to_str('MINIO_BUCKET')
+    s3_mount_path: str = Env.to_str('S3_MOUNT_PATH', '/content/s3')
+    gs_mount_path: str = Env.to_str('GS_MOUNT_PATH', '/content/gs')
+    minio_mount_path: str = Env.to_str('MINIO_MOUNT_PATH', '/content/minio')
+    ## Auths
+    ### GCP
+    gauth: Type(Path) = Env.to_json('GS_AUTH', 'GOOGLE_APPLICATION_CREDENTIALS', '/authz/adc.json')
+    ### AWS
+    s3_key_id: str = Env.to_str_env('AWS_KEYID', 'AWS_ACCESS_KEY_ID', '')
+    s3_secret: str = Env.to_str_env('AWS_SECRET', 'AWS_SECRET_ACCESS_KEY', '')
+    s3_region: str = Env.to_str('AWS_REGION', 'us-east-1')
+    ### Minio
+    minio_endpoint: str = Env.to_str('MINIO_ENDPOINT')
+    minio_key_id: str = Env.to_str('MINIO_KEYID')
+    minio_secret: str = Env.to_str('MINIO_SECRET')
+    
+    @classmethod
+    def update_config(cls, **kwargs):
+        for k,v in kwargs.items():
+            if getattr(cls, k, None): setattr(cls, k, v)
+
+    @classmethod
+    def mount_gdrive(cls, force: bool = False):
+        if cls.mount_drive or force and colab_env: drive.mount("/content/drive")
+    
+    @classmethod
+    def setup_storage(cls, **kwargs):
+        if kwargs: cls.update_config(**kwargs)
+        cls.write_envfile()
+        cls.mount_gdrive()
+        logger.info(f'Setting up Storage. This may take a while...')
+        exec_shell(f'sudo bash {cls.envfile.string}')
+    
+    @classproperty
+    def envfile(cls): return scripts_dir.joinpath('load_env.sh')
+    
+    @classproperty
+    def s3_endpoint(cls): return f'https://s3.{cls.s3_region}.amazonaws.com'
+    
+    @classmethod
+    def write_envfile(cls):
+        logger.info(f'Writing Envfile to {cls.envfile.string}')
+        cls.envfile.write_text(cls.get_envfile_values())
+    
+    @classmethod
+    def get_envfile_data(cls):
+        return {
+            'MOUNT_DRIVE': cls.mount_drive,
+            'MOUNT_S3': cls.mount_s3,
+            'MOUNT_MINIO': cls.mount_minio,
+            'S3_BUCKET': cls.s3_bucket,
+            'S3_MOUNT_PATH': cls.s3_mount_path,
+            'AWS_ACCESS_KEY_ID': cls.s3_key_id,
+            'AWS_SECRET_ACCESS_KEY': cls.s3_secret,
+            'AWS_REGION': cls.s3_region,
+            'S3_ENDPOINT': cls.s3_endpoint,
+            'GOOGLE_APPLICATION_CREDENTIALS': cls.gauth.as_posix(),
+            'GS_BUCKET': cls.gs_bucket,
+            'GS_MOUNT_PATH': cls.gs_mount_path,
+            'MINIO_BUCKET': cls.minio_bucket,
+            'MINIO_MOUNT_PATH': cls.minio_mount_path,
+            'MINIO_ENDPOINT': cls.minio_endpoint,
+            'MINIO_ACCESS_KEY': cls.minio_key_id,
+            'MINIO_SECRET_KEY': cls.minio_secret            
+        }
         
+    
+    @classmethod
+    def get_envfile_values(cls):
+        t = f"""
+        #!/bin/bash
+        
+        ## This is the file used to load the envs
+        
+        export MOUNT_DRIVE={cls.mount_drive}
+        export MOUNT_S3={cls.mount_s3}
+        export MOUNT_GS={cls.mount_gs}
+        export MOUNT_MINIO={cls.mount_minio}
+        
+        export S3_BUCKET={cls.s3_bucket}
+        export S3_MOUNT_PATH={cls.s3_mount_path}
+        export AWS_ACCESS_KEY_ID={cls.s3_key_id}
+        export AWS_SECRET_ACCESS_KEY={cls.s3_secret}
+        export AWS_REGION={cls.s3_region}
+        export S3_ENDPOINT={cls.s3_endpoint}
+        
+        export GOOGLE_APPLICATION_CREDENTIALS={cls.gauth.as_posix()}
+        export GS_BUCKET={cls.gs_bucket}
+        export GS_MOUNT_PATH={cls.gs_mount_path}
+        
+        export MINIO_BUCKET={cls.minio_bucket}
+        export MINIO_MOUNT_PATH={cls.minio_mount_path}
+        export MINIO_ENDPOINT={cls.minio_endpoint}
+        export MINIO_ACCESS_KEY={cls.minio_key_id}
+        export MINIO_SECRET_KEY={cls.minio_secret}
+        """
+        return t
+    
+    @classmethod
+    def export_config(cls):
+        return {
+            'MOUNT_DRIVE': cls.mount_drive,
+            'MOUNT_S3': cls.mount_s3,
+            'MOUNT_MINIO': cls.mount_minio,
+            'S3_BUCKET': cls.s3_bucket,
+            'S3_MOUNT_PATH': cls.s3_mount_path,
+            'AWS_KEYID': cls.s3_key_id,
+            'AWS_SECRET': cls.s3_secret,
+            'AWS_REGION': cls.s3_region,
+            'S3_ENDPOINT': cls.s3_endpoint,
+            'GS_AUTH': cls.gauth.read_text(),
+            'GS_BUCKET': cls.gs_bucket,
+            'GS_MOUNT_PATH': cls.gs_mount_path,
+            'MINIO_BUCKET': cls.minio_bucket,
+            'MINIO_MOUNT_PATH': cls.minio_mount_path,
+            'MINIO_ENDPOINT': cls.minio_endpoint,
+            'MINIO_ACCESS_KEY': cls.minio_key_id,
+            'MINIO_SECRET_KEY': cls.minio_secret            
+        }
+    
+    @classmethod
+    def reload_from_env(cls):
+        logger.info(f'Reloading StorageConfig from Environment')
+        cls.mount_drive: bool = Env.to_bool('MOUNT_DRIVE') or cls.mount_drive
+        cls.mount_s3: bool = Env.to_bool('MOUNT_S3') or cls.mount_s3
+        cls.mount_gs: bool = Env.to_bool('MOUNT_GS') or cls.mount_gs
+        cls.mount_minio: bool = Env.to_bool('MOUNT_MINIO') or cls.mount_minio
+        cls.s3_bucket: str = Env.to_str('S3_BUCKET', cls.s3_bucket)
+        cls.gs_bucket: str = Env.to_str('GS_BUCKET', cls.gs_bucket)
+        cls.minio_bucket: str = Env.to_str('MINIO_BUCKET', cls.minio_bucket)
+        cls.s3_mount_path: str = Env.to_str('S3_MOUNT_PATH', cls.s3_mount_path)
+        cls.gs_mount_path: str = Env.to_str('GS_MOUNT_PATH', cls.gs_mount_path)
+        cls.minio_mount_path: str = Env.to_str('MINIO_MOUNT_PATH', cls.minio_mount_path)
+        ### GCP
+        cls.gauth: Type(Path) = Env.to_json('GS_AUTH', 'GOOGLE_APPLICATION_CREDENTIALS', cls.gauth.as_posix())
+        ### AWS
+        cls.s3_key_id: str = Env.to_str_env('AWS_KEYID', 'AWS_ACCESS_KEY_ID', cls.s3_key_id)
+        cls.s3_secret: str = Env.to_str_env('AWS_SECRET', 'AWS_SECRET_ACCESS_KEY', cls.s3_secret)
+        cls.s3_region: str = Env.to_str('AWS_REGION', cls.s3_region)
+        ### Minio
+        cls.minio_endpoint: str = Env.to_str('MINIO_ENDPOINT', cls.minio_endpoint)
+        cls.minio_key_id: str = Env.to_str('MINIO_KEYID', cls.minio_key_id)
+        cls.minio_secret: str = Env.to_str('MINIO_SECRET', cls.minio_secret)

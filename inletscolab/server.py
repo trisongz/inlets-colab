@@ -30,9 +30,6 @@ class Server:
         if cls.d: return
         ServerConfig.update_config(**kwargs)
         exec_shell(f"fuser -n tcp -k {ServerConfig.port}")
-        if ServerConfig.mount_drive and ServerConfig.is_colab:
-            from google.colab import drive
-            drive.mount("/content/drive")
         if ServerConfig.code: ServerConfig.ensure_codeserver()
     
     @classmethod
