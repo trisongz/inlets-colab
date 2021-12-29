@@ -3,7 +3,7 @@ from .inlets import Inlets
 from .server import Server
 
 """ Wrapper Class to manage both"""
-class InletColab:
+class InletsColab:
 
     @classmethod
     def start(cls, license: str = None, overwrite_license: bool = False, overwrite_service: bool = False, inlets_service: bool = True, server_background: bool = False, **kwargs):

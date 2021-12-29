@@ -7,4 +7,4 @@ from . import client
 from . import classes
 from . import utils
 
-from .client import InletColab
+from .client import InletsColab

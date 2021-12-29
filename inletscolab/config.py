@@ -119,7 +119,7 @@ class InletsConfig:
 
     @classmethod
     def ensure_inlets(cls):
-        if cls._inlets_exists: return
+        if cls.inlets_exists: return
         exec_shell(f'cd {bin_dir.string} && sudo bash {_inlets_installer.string}')
         exec_shell('sudo inletsctl download')
     
