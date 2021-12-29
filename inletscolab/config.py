@@ -118,8 +118,8 @@ class InletsConfig:
         cls.license = license
 
     @classmethod
-    def ensure_inlets(cls):
-        if cls.inlets_exists: return
+    def ensure_inlets(cls, overwrite: bool = False):
+        if cls.inlets_exists and not overwrite: return
         exec_shell(f'cd {bin_dir.string} && sudo bash {_inlets_installer.string}')
         exec_shell('sudo inletsctl download')
     
