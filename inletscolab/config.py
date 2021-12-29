@@ -347,7 +347,7 @@ class StorageConfig:
     
     @classproperty
     def has_mounts(cls):
-        return any(cls.mount_gs, cls.mount_s3, cls.mount_minio)
+        return any([cls.mount_gs, cls.mount_s3, cls.mount_minio])
     
     @classproperty
     def envfile(cls): return scripts_dir.joinpath('load_env.sh')
