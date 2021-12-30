@@ -31,7 +31,7 @@ _cs_installer = scripts_dir.joinpath('get_codeserver.sh')
 CSDefaultExtensions = ["ms-python.python", "ms-toolsai.jupyter", "mechatroner.rainbow-csv", "vscode-icons-team.vscode-icons", "tabnine.tabnine-vscode", "almenon.arepl", "kevinrose.vsc-python-indent", "ms-vscode-remote.remote-ssh", "mutantdino.resourcemonitor", "ms-python.vscode-pylance"]
 CSDefaultVersion = "3.12.0"
 
-logger = get_logger('inlets-colab')
+logger = get_logger('InletsColab')
 
 DebugEnabled: bool = Env.to_bool('DEBUG_ENABLED')
 
