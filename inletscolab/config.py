@@ -371,12 +371,12 @@ class StorageConfig:
     
     @classmethod
     def write_envfile(cls):
-        logger.info(f'Writing Envfile to {cls.envfile.string}')
+        if DebugEnabled: logger.info(f'Writing Envfile to {cls.envfile.string}')
         cls.envfile.write_text(cls.get_envfile_values())
     
     @classmethod
     def write_botofile(cls):
-        logger.info(f'Writing Botofile to {cls.botofile.string}')
+        if DebugEnabled: logger.info(f'Writing Botofile to {cls.botofile.string}')
         cls.botofile.write_text(cls.get_boto_values())
     
     @classmethod
