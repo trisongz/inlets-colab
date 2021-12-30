@@ -274,10 +274,10 @@ class ServerConfig:
         elif cls.lab: 
             msg += "Jupyter Lab"
             if cls.lab_token: msg += f" Token: {cls.lab_token}"
-        if cls.password: msg += f" Password: {cls.password}"
         msg += f" @ {cls.host}:{cls.port}"
         logger.info(msg)
-        if cls.code: logger.info(f'\n\nYour CodeServer is Available Here: {cls.public_url}/?folder=/content\n\n')
+        if cls.code: logger.info(f'\n\nYour CodeServer is Available Here: {cls.public_url}/?folder=/content\n')
+        if cls.password: logger.info(f'\nYour CodeServer Password: {cls.password}\n\n')
     
     
     @classmethod
