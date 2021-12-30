@@ -1,5 +1,5 @@
 from lazycls.types import *
-from lazycls.io import Path
+from lazycls.io import Path, PathLike
 from lazycls.envs import Env
 from .config import logger, StorageConfig, ServerConfig, InletsConfig
 from .inlets import Inlets
@@ -47,7 +47,7 @@ class InletsColab:
         return data
     
     @classmethod
-    def save(cls, path: str = '/content/inletscolab.yaml', overwrite: bool = False):
+    def save(cls, path: PathLike = '/content/inlets_colab.json', overwrite: bool = False):
         p = Path(path)
         if p.exists() and not overwrite:
             logger.error(f'InletsColab Config exists at {p.string} and overwrite = False. Exiting')
@@ -56,13 +56,19 @@ class InletsColab:
         return Env.save_config(cls.export_config(), path=p)
 
     @classmethod
-    def load(cls, path: str = '/content/inletscolab.yaml', override: bool = False):
+    def load(cls, path: PathLike = '/content/inlets_colab.json', override: bool = False):
         p = Path(path)
         logger.info(f'Loading InletsColab Config from {p.string}')
         p = Env.load_config(p, set_as_env=True, override=override)
         InletsConfig.reload_from_env()
         ServerConfig.reload_from_env()
         StorageConfig.reload_from_env()
-        
+    
+    @classmethod
+    def reload_from_env(cls):
+        InletsConfig.reload_from_env()
+        ServerConfig.reload_from_env()
+        StorageConfig.reload_from_env()
+    
         
 
