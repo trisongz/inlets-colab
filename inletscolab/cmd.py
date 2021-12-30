@@ -27,8 +27,8 @@ cli = typer.Typer()
 
 @cli.command('start')
 def run_inlets_colab(
-    license: str = Argument(None, help="Inlets Pro License", envvar="INLETS_LICENSE"),
     envfile: Optional[Path] = Option(None, help="Path to Env File that will be loaded"),
+    license: Optional[str] = Option(None, help="Inlets Pro License", envvar="INLETS_LICENSE"),
     overwrite_license: bool = Option(False, help="Whether to overwrite existing License"), 
     inlets_service: bool = Option(False, help="Whether to run Inlets as a systemd service - has failed testing."),
     server_background: bool = Option(False, help="Whether to run Server as a background service - has failed testing"),
