@@ -3,7 +3,7 @@ from typing import Tuple, List, Optional
 from typer import Argument, Option
 from pathlib import Path
 from lazycls.envs import Env
-from lazycls.serializers import Yaml
+from lazycls.serializers import Yaml, OrJson
 from .client import InletsColab, logger
 
 def parse_args(args: List[str] = []):
@@ -23,11 +23,18 @@ def get_server_config():
     if not p.exists(): return {}
     return Yaml.loads(p.read_text())
 
+def load_envfile_config(envfile: Path, override: bool = False):
+    envars = Yaml.loads(envfile.read_text()) if envfile.suffix in {'.yml', '.yaml'} else OrJson.loads(envfile.read_text())
+    for k,v in envars.items():
+        Env.set_env(k, v, override=override)
+    
+
 cli = typer.Typer()
 
 @cli.command('start')
 def run_inlets_colab(
     envfile: Optional[Path] = Option(None, help="Path to Env File that will be loaded"),
+    encoded_envfile: bool = Option(False, help="Set to True if this Envfile is Encoded by using InletsColab.save()"),
     license: Optional[str] = Option(None, help="Inlets Pro License", envvar="INLETS_LICENSE"),
     overwrite_license: bool = Option(False, help="Whether to overwrite existing License"), 
     inlets_service: bool = Option(False, help="Whether to run Inlets as a systemd service - has failed testing."),
@@ -39,7 +46,9 @@ def run_inlets_colab(
     storage: Optional[List[str]] = Option([], help = "A Repeating List of Args for Storage in format of key=value"),
 ):  
     if envfile and envfile.exists():
-        InletsColab.load(path=envfile, override=override_env)
+        if encoded_envfile: InletsColab.load(path=envfile, override=override_env)
+        else: load_envfile_config(envfile, override=override_env)  
+        InletsColab.reload_from_env()
     if env:
         set_envs_from_args(env, override=override_env)
         InletsColab.reload_from_env()
