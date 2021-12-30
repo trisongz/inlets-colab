@@ -163,7 +163,7 @@ install_prereqs
 install_juicefs
 
 ## Attempt to restore backupfile if redis file doesnt exist
-if [[ ! -f /content/cache/redis/appendonly.aof ]]; then
+if [[ ! -f /content/cache/redis/appendonly.aof && "$STORAGE_BACKUP" ]]; then
     restore_backupfile
 else
     start_redis
