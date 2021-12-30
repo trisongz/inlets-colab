@@ -3,11 +3,11 @@ from typing import Tuple, List, Optional
 from typer import Argument, Option
 from .client import InletsColab
 
-def parse_args(args: List[Tuple[str, str]]):
+def parse_args(args: List[str] = []):
     kwargs = {}
     for arg in args:
-        key, val = arg
-        kwargs[key] = val
+        key, val = arg.split('=', 1)
+        kwargs[key.strip()] = val.strip()
     return kwargs
 
 cli = typer.Typer()
@@ -19,9 +19,12 @@ def run_inlets_colab(
     overwrite_service: bool = Option(False), 
     inlets_service: bool = Option(False), 
     server_background: bool = Option(False), 
-    inlet: Optional[List[Tuple[str, str]]] = Option((None, None), help = "A Repeating List of Args for Inlets"),
-    server:  Optional[List[Tuple[str, str]]] = Option((None, None), help = "A Repeating List of Args for Server"),
-    storage: Optional[List[Tuple[str, str]]] = Option((None, None), help = "A Repeating List of Args for Storage"),
+    inlet: Optional[List[str]] = Option([], help = "A Repeating List of Args for Inlets in format of key=value"),
+    server:  Optional[List[str]] = Option([], help = "A Repeating List of Args for Server in format of key=value"),
+    storage: Optional[List[str]] = Option([], help = "A Repeating List of Args for Storage in format of key=value"),
+    #inlet: Optional[List[Tuple[str, str]]] = Option((None, None), help = "A Repeating List of Args for Inlets"),
+    #server:  Optional[List[Tuple[str, str]]] = Option((None, None), help = "A Repeating List of Args for Server"),
+    #storage: Optional[List[Tuple[str, str]]] = Option((None, None), help = "A Repeating List of Args for Storage"),
 ):  
     inlets_args = parse_args(inlet)
     server_args = parse_args(server)
