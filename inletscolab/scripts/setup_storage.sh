@@ -47,37 +47,6 @@ stop_redis() {
     fi
 }
 
-restore_backupfile() {
-    ## Gs = 0, S3 = 1, min = 2
-    bfExists=$(gsutil -q stat $STORAGE_BACKUP/storage_backup.tar.gz || echo 1)
-    if [[ $bfExists != 1 ]]; then
-        ## this means the file exists so we can restore it
-        mkdir -p /content/cache/.backup
-        gsutil -m cp $STORAGE_BACKUP/storage_backup.tar.gz /content/cache/storage_backup.tar.gz
-        tar -zxvf /content/cache/storage_backup.tar.gz -C /content/cache/.backup
-        stop_redis
-        if [[ -f /content/cache/.backup/dump.rdb ]]; then
-            cp /content/cache/.backup/dump.rdb /content/cache/redis/dump.rdb
-        fi
-        if [[ -f /content/cache/.backup/appendonly.aof ]]; then
-            cp /content/cache/.backup/appendonly.aof /content/cache/redis/appendonly.aof
-        fi
-        start_redis
-
-        if [[ -f /content/cache/.backup/gs_metadata.json && "$MOUNT_GS" == "True" && "$GS_BUCKET" != "" ]]; then
-            juicefs load redis://127.0.0.1:6379/0 /content/cache/.backup/gs_metadata.json
-        fi
-        if [[ -f /content/cache/.backup/s3_metadata.json && "$MOUNT_S3" == "True" && "$S3_BUCKET" != "" ]]; then
-            juicefs load redis://127.0.0.1:6379/1 /content/cache/.backup/s3_metadata.json
-        fi
-        if [[ -f /content/cache/.backup/minio_metadata.json && "$MOUNT_MINIO" == "True" && "$MINIO_BUCKET" != "" ]]; then
-            juicefs load redis://127.0.0.1:6379/2 /content/cache/.backup/minio_metadata.json
-        fi
-        rm -rf /content/cache/.backup
-        rm /content/cache/storage_backup.tar.gz
-    fi
-}
-
 format_juicefs() {
     if [[ "$MOUNT_GS" == "True" && "$GS_BUCKET" != ""  ]]; then
         echo "Formatting JuiceFS for Google Cloud Storage with Bucket $GS_BUCKET"
@@ -111,6 +80,41 @@ format_juicefs() {
             --compress zstd \
             redis://127.0.0.1:6379/2 \
             colab
+    fi
+}
+
+
+restore_backupfile() {
+    ## Gs = 0, S3 = 1, min = 2
+    bfExists=$(gsutil -q stat $STORAGE_BACKUP/storage_backup.tar.gz || echo 1)
+    if [[ $bfExists != 1 ]]; then
+        ## this means the file exists so we can restore it
+        mkdir -p /content/cache/.backup
+        gsutil -m cp $STORAGE_BACKUP/storage_backup.tar.gz /content/cache/storage_backup.tar.gz
+        tar -zxvf /content/cache/storage_backup.tar.gz -C /content/cache/.backup
+        stop_redis
+        if [[ -f /content/cache/.backup/dump.rdb ]]; then
+            cp /content/cache/.backup/dump.rdb /content/cache/redis/dump.rdb
+        fi
+        if [[ -f /content/cache/.backup/appendonly.aof ]]; then
+            cp /content/cache/.backup/appendonly.aof /content/cache/redis/appendonly.aof
+        fi
+        start_redis
+
+        if [[ -f /content/cache/.backup/gs_metadata.json && "$MOUNT_GS" == "True" && "$GS_BUCKET" != "" ]]; then
+            juicefs load redis://127.0.0.1:6379/0 /content/cache/.backup/gs_metadata.json
+        fi
+        if [[ -f /content/cache/.backup/s3_metadata.json && "$MOUNT_S3" == "True" && "$S3_BUCKET" != "" ]]; then
+            juicefs load redis://127.0.0.1:6379/1 /content/cache/.backup/s3_metadata.json
+        fi
+        if [[ -f /content/cache/.backup/minio_metadata.json && "$MOUNT_MINIO" == "True" && "$MINIO_BUCKET" != "" ]]; then
+            juicefs load redis://127.0.0.1:6379/2 /content/cache/.backup/minio_metadata.json
+        fi
+        rm -rf /content/cache/.backup
+        rm /content/cache/storage_backup.tar.gz
+    else
+        start_redis
+        format_juicefs
     fi
 }
 
@@ -163,7 +167,7 @@ install_prereqs
 install_juicefs
 
 ## Attempt to restore backupfile if redis file doesnt exist
-if [[ ! -f /content/cache/redis/appendonly.aof && "$STORAGE_BACKUP" ]]; then
+if [[ ! -f /content/cache/redis/appendonly.aof && "$STORAGE_BACKUP" != "" ]]; then
     restore_backupfile
 else
     start_redis
