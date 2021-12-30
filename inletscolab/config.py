@@ -9,7 +9,7 @@ from logz import get_logger
 
 
 try:
-    from google.colab import drive
+    from google.colab import drive # type: ignore
     colab_env = True
 except ImportError:
     colab_env = False

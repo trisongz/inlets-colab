@@ -1,4 +1,4 @@
-from .config import ServerConfig, logger, DebugEnabled
+from inletscolab.config import ServerConfig, logger, DebugEnabled
 from lazycls.utils import exec_shell, exec_daemon, subprocess
 
 

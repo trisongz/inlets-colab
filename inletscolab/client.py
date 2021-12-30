@@ -1,9 +1,9 @@
 from lazycls.types import *
 from lazycls.io import Path, PathLike
 from lazycls.envs import Env
-from .config import logger, StorageConfig, ServerConfig, InletsConfig
-from .inlets import Inlets
-from .server import Server
+from inletscolab.config import logger, StorageConfig, ServerConfig, InletsConfig
+from inletscolab.inlets import Inlets
+from inletscolab.server import Server
 
 """ Wrapper Client Class to manage all resources"""
 class InletsColab:

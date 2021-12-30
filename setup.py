@@ -4,9 +4,7 @@ import sys
 from pathlib import Path
 from setuptools import setup, find_packages
 
-
-if sys.version_info.major != 3:
-    raise RuntimeError("This package requires Python 3+")
+if sys.version_info.major != 3: raise RuntimeError("This package requires Python 3+")
 
 
 version = '0.0.0a'

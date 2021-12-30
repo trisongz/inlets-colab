@@ -1,10 +1,10 @@
 import typer
-from typing import Tuple, List, Optional
+from typing import List, Optional
 from typer import Argument, Option
 from pathlib import Path
 from lazycls.envs import Env
 from lazycls.serializers import Yaml, OrJson
-from .client import InletsColab, logger
+from inletscolab.client import InletsColab, logger
 
 def parse_args(args: List[str] = []):
     kwargs = {}
