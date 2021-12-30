@@ -5,12 +5,12 @@ ENVFILE=$1
 SCRIPTS_DIR=$(dirname "$(realpath $0)")
 ENV_FILE=${ENVFILE:-"$SCRIPTS_DIR/load_env.sh"}
 
-echo "Loading Env from $ENV_FILE"
+#echo "Loading Env from $ENV_FILE"
 source "$ENV_FILE"
 
 
 install_prereqs() {
-    apt update && apt install -y curl fuse
+    apt update -qq && apt install -y -qq curl fuse
 }
 
 install_gcsfuse() {
@@ -18,7 +18,7 @@ install_gcsfuse() {
         export GCSFUSE_REPO=gcsfuse-`lsb_release -c -s`
         echo "deb http://packages.cloud.google.com/apt $GCSFUSE_REPO main" | sudo tee /etc/apt/sources.list.d/gcsfuse.list
         curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
-        sudo apt-get update && sudo apt-get install -y gcsfuse
+        sudo apt-get -qq update && sudo apt-get install -y -qq gcsfuse
     fi
 }
 
@@ -41,7 +41,7 @@ mount_gcsfuse() {
 
 install_s3fs() {
     if [[ "$(which s3fs)" == "" ]]; then
-        sudo apt-get update && sudo apt-get install -y s3fs
+        sudo apt-get -qq update && sudo apt-get install -y -qq s3fs
     fi
 }
 
