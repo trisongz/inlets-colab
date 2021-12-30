@@ -85,7 +85,6 @@ format_juicefs() {
             --storage gs \
             --bucket $GS_BUCKET \
             --compress zstd \
-            --no-update \
             redis://127.0.0.1:6379/0 \
             colab
     fi
@@ -98,7 +97,6 @@ format_juicefs() {
             --secret-key $AWS_SECRET_ACCESS_KEY \
             --bucket $S3_BUCKET_ENDPOINT \
             --compress zstd \
-            --no-update \
             redis://127.0.0.1:6379/1 \
             colab
     fi
@@ -111,7 +109,6 @@ format_juicefs() {
             --access-key $MINIO_ACCESS_KEY \
             --secret-key $MINIO_SECRET_KEY \
             --compress zstd \
-            --no-update \
             redis://127.0.0.1:6379/2 \
             colab
     fi
