@@ -30,10 +30,10 @@ mount_gcsfuse() {
         fi
         mkdir -p "$GS_MOUNT_PATH"
         if [[ "$(ls -A $GS_MOUNT_PATH)" ]]; then
+            echo "Another Bucket is already mounted at $GS_MOUNT_PATH"
+        else
             echo "Mounting Google Storage Bucket $GS_BUCKET to $GS_MOUNT_PATH"
             gcsfuse "$GS_BUCKET" "$GS_MOUNT_PATH"
-        else
-            echo "Another Bucket is already mounted at $GS_MOUNT_PATH"
         fi
     fi
 }
@@ -55,10 +55,10 @@ mount_s3fs() {
         setup_s3fs_credentials
         mkdir -p "$S3_MOUNT_PATH"
         if [[ "$(ls -A $S3_MOUNT_PATH)" ]]; then
+            echo "S3 Bucket is already mounted at $S3_MOUNT_PATH"
+        else
             echo "Mounting S3 Bucket $S3_BUCKET to $S3_MOUNT_PATH"
             s3fs "$S3_BUCKET" "$S3_MOUNT_PATH" -o passwd_file=/etc/passwd-s3fs
-        else
-            echo "S3 Bucket is already mounted at $S3_MOUNT_PATH"
         fi
     fi
 
@@ -74,10 +74,11 @@ mount_miniofs() {
         setup_miniofs_credentials
         mkdir -p "$MINIO_MOUNT_PATH"
         if [[ "$(ls -A $MINIO_MOUNT_PATH)" ]]; then
+            echo "Minio Bucket is already mounted at $MINIO_MOUNT_PATH"
+        else
             echo "Mounting Minio Bucket $MINIO_BUCKET to $MINIO_MOUNT_PATH"
             s3fs "$MINIO_BUCKET" "$MINIO_MOUNT_PATH" -o passwd_file=/etc/passwd-miniofs -o url="$MINIO_ENDPOINT/" -o use_path_request_style
-        else
-            echo "Minio Bucket is already mounted at $MINIO_MOUNT_PATH"
+            
         fi
     fi
 
