@@ -39,8 +39,12 @@ class InletsColab:
         cls.kill_inlets()
         
     @classmethod
-    def export_config(cls): 
-        return {**InletsConfig.export_config(), **ServerConfig.export_config(), **StorageConfig.export_config()}
+    def export_config(cls):
+        data = {}
+        data.update(**InletsConfig.export_config())
+        data.update(**ServerConfig.export_config())
+        data.update(**StorageConfig.export_config())
+        return data
     
     @classmethod
     def save(cls, path: str = '/content/inletscolab.yaml', overwrite: bool = False):
