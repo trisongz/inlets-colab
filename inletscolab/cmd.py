@@ -52,7 +52,7 @@ def run_inlets_colab(
 def stop_inlets_colab():
     InletsColab.stop()
 
-serverCli = typer.Typer('server')
+serverCli = typer.Typer(name='server')
 
 @serverCli.command('password')
 def show_server_password():
