@@ -1,9 +1,9 @@
 
 # Inlets Colab
  
- [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/trisongz/inlets-colab/blob/main/examples/colab_example.ipynb)
-
  Run `CodeServer` on `Colab` using `Inlets` in less than 60 secs using your own domain.
+
+ [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/trisongz/inlets-colab/blob/main/examples/colab_example.ipynb)
 
 ### Features
 
