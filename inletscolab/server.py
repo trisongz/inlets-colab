@@ -1,6 +1,5 @@
-from inletscolab.config import ServerConfig, logger, DebugEnabled
 from lazycls.utils import exec_shell, exec_daemon, subprocess
-
+from inletscolab.config import ServerConfig, logger, DebugEnabled
 
 class Server:
     d: subprocess.Popen = None
@@ -41,13 +40,3 @@ class Server:
         cls.run_background(cmd, **kwargs)
         
 
-
-
-            
-        
-             
-    
-
-    
-    
-        

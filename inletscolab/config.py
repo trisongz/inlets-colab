@@ -1,4 +1,3 @@
-from uuid import uuid1
 from lazycls.envs import Env
 from lazycls.prop import classproperty
 from lazycls.types import *
@@ -6,6 +5,7 @@ from lazycls.io import Path, PathLike
 from lazycls.serializers import Base
 from lazycls.utils import find_binary_in_path, exec_shell
 from logz import get_logger
+from uuid import uuid1
 
 
 try:
