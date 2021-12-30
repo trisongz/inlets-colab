@@ -8,8 +8,9 @@
 ### Features
 
 - [x] Optimized for Inlets/InletsPro
-- [x] Use your own Custom `CodeServer` Domain `i.e. https://colab.yourdomain.com`
+- [x] Use your own Custom Domain `i.e. https://colab.yourdomain.com`
 - [x] Quick Deployment
+- [x] Password Protection (Optional)
 - [x] Notebook/CLI Support
 - [x] GDrive Integration
 - [x] Cloud Storage Integration (gcs, s3, minio, etc.)
@@ -50,6 +51,7 @@ os.environ['INLETS_TOKEN'] = ... # Inlets Token
 os.environ['INLETS_TUNNEL_HOST'] = "inlets.domain.com" # Inlets Tunnel Host (ControlPlane)
 os.environ['INLETS_SERVER_HOST'] = "colab.domain.com" # Inlets Tunnel Host (DataPlane)
 os.environ['INLETS_CLIENT_HOST'] = "127.0.0.1" # The Local Server IP
+os.environ['INLETS_CLIENT_PORT'] = "7070" # The Local Server IP
 os.environ['GENERATE_AUTH'] = "true" # Will generate password if not provided
 os.environ['MOUNT_GS'] = "true" # Bool to mount GCS Bucket
 os.environ['GS_BUCKET'] = "gs_bucket" # Name of GCS Bucket to Mount
@@ -75,6 +77,7 @@ INLETS_TOKEN: ...
 INLETS_TUNNEL_HOST: inlets.domain.com
 INLETS_SERVER_HOST: colab.domain.com
 INLETS_CLIENT_HOST: 127.0.0.1
+INLETS_CLIENT_PORT: '7070'
 GENERATE_AUTH: 'true'
 MOUNT_GS: 'true'
 GS_BUCKET: gs_bucket
@@ -258,7 +261,7 @@ Python Dependencies
 
 - [typer](https://github.com/tiangolo/typer)
 
-Other Dependencies
+Runtime Dependencies
 
 - [inletsctl](https://github.com/inlets/inlets-pro)
 
