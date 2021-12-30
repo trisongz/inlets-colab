@@ -1,7 +1,7 @@
 import typer
 from typing import Tuple, List, Optional
 from typer import Argument, Option
-from lazycls.io import Path
+from pathlib import Path
 from lazycls.envs import Env
 from lazycls.serializers import Yaml
 from .client import InletsColab, logger
@@ -19,7 +19,7 @@ def set_envs_from_args(args: List[str] = [], override: bool = False):
         Env.set_env(k, v, override=override)
     
 def get_server_config():
-    p = Path.get_path('/root/.config/code-server/config.yaml')
+    p = Path('/root/.config/code-server/config.yaml')
     if not p.exists(): return {}
     return Yaml.loads(p.read_text())
 
