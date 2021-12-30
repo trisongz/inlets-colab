@@ -4,8 +4,8 @@ from lazycls.prop import classproperty
 from lazycls.types import *
 from lazycls.io import Path, PathLike
 from lazycls.serializers import Base
-from lazycls.utils import find_binary_in_path, exec_shell, exec_run, exec_daemon, subprocess
-from logz import get_cls_logger, get_logger
+from lazycls.utils import find_binary_in_path, exec_shell
+from logz import get_logger
 
 
 try:
@@ -349,8 +349,6 @@ class StorageConfig:
         if cls.has_mounts:
             logger.info(f'Setting up Storage. This may take a while...')
             exec_shell(f'sudo bash {cls.storage_setup_exec_script.string}')
-            #if cls.storage_backup:
-            #    exec_daemon(cmd=['bash', cls.storage_run_exec_script.string], set_proc_uid=False)
     
     @classproperty
     def has_mounts(cls):
@@ -363,7 +361,7 @@ class StorageConfig:
     def botofile(cls): return authz_dir.joinpath('.boto')
     
     @classproperty
-    def storage_setup_exec_script(cls): return scripts_dir.joinpath('setup_storage_v2.sh')
+    def storage_setup_exec_script(cls): return scripts_dir.joinpath('setup_storage.sh')
     
     @classproperty
     def storage_run_exec_script(cls): return scripts_dir.joinpath('run_storage.sh')

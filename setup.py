@@ -17,8 +17,7 @@ root = Path(__file__).parent
 requirements = [
     'lazycls',
     'pylogz',
-    'uvicorn',
-    'nest_asyncio',
+    'typer',
 ]
 
 args = {
@@ -28,6 +27,9 @@ args = {
     'python_requires': '>=3.7',
     'include_package_data': True,
     'entry_points': {
+        'console_scripts': [
+            'inletscolab = inletscolab.cmd:cli',
+        ]
     }
 }
 

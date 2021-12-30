@@ -18,7 +18,7 @@ pip install --upgrade git+https://github.com/trisongz/inlets-colab
 ## Usage
 
 ```python
-import inlets-colab
+import inletscolab
 
 ## Do something here
 
@@ -27,11 +27,14 @@ import inlets-colab
 ---
 
 ## Libraries & Dependencies
+
 - `Python 3.7`
+
 - `lazycls`
 
 - `pylogz`
 
+- `typer`
 
 ---
 
