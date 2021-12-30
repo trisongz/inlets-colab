@@ -319,6 +319,7 @@ class StorageConfig:
     ## Auths
     ### GCP
     gauth: PathLike = Env.to_json('GS_AUTH', 'GOOGLE_APPLICATION_CREDENTIALS', '/authz/adc.json')
+    gproject: str = Env.to_str('GS_PROJECT')
     ### AWS
     s3_key_id: str = Env.to_str_env('AWS_KEYID', 'AWS_ACCESS_KEY_ID', '')
     s3_secret: str = Env.to_str_env('AWS_SECRET', 'AWS_SECRET_ACCESS_KEY', '')
@@ -327,6 +328,8 @@ class StorageConfig:
     minio_endpoint: str = Env.to_str('MINIO_ENDPOINT')
     minio_key_id: str = Env.to_str('MINIO_KEYID')
     minio_secret: str = Env.to_str('MINIO_SECRET')
+    ### Backups
+    storage_backup: str = Env.to_str('STORAGE_BACKUP', '')
     
     @classmethod
     def update_config(cls, **kwargs):
@@ -341,10 +344,13 @@ class StorageConfig:
     def setup_storage(cls, **kwargs):
         if kwargs: cls.update_config(**kwargs)
         cls.write_envfile()
+        cls.write_botofile()
         cls.mount_gdrive()
         if cls.has_mounts:
             logger.info(f'Setting up Storage. This may take a while...')
-            exec_shell(f'sudo bash {cls.storage_exec_script.string}')
+            exec_shell(f'sudo bash {cls.storage_setup_exec_script.string}')
+            if cls.storage_backup:
+                exec_daemon(cmd=['bash', cls.storage_run_exec_script.string], set_proc_uid=False)
     
     @classproperty
     def has_mounts(cls):
@@ -352,9 +358,15 @@ class StorageConfig:
     
     @classproperty
     def envfile(cls): return scripts_dir.joinpath('load_env.sh')
+
+    @classproperty
+    def botofile(cls): return authz_dir.joinpath('.boto')
     
     @classproperty
-    def storage_exec_script(cls): return scripts_dir.joinpath('setup_storage.sh')
+    def storage_setup_exec_script(cls): return scripts_dir.joinpath('setup_storage.sh')
+    
+    @classproperty
+    def storage_run_exec_script(cls): return scripts_dir.joinpath('run_storage.sh')
     
     @classproperty
     def s3_endpoint(cls): return f'https://s3.{cls.s3_region}.amazonaws.com'
@@ -363,6 +375,11 @@ class StorageConfig:
     def write_envfile(cls):
         logger.info(f'Writing Envfile to {cls.envfile.string}')
         cls.envfile.write_text(cls.get_envfile_values())
+    
+    @classmethod
+    def write_botofile(cls):
+        logger.info(f'Writing Botofile to {cls.botofile.string}')
+        cls.botofile.write_text(cls.get_boto_values())
     
     @classmethod
     def get_envfile_data(cls):
@@ -383,9 +400,28 @@ class StorageConfig:
             'MINIO_MOUNT_PATH': cls.minio_mount_path,
             'MINIO_ENDPOINT': cls.minio_endpoint,
             'MINIO_ACCESS_KEY': cls.minio_key_id,
-            'MINIO_SECRET_KEY': cls.minio_secret            
+            'MINIO_SECRET_KEY': cls.minio_secret,
+            'BOTO_PATH': cls.botofile.string,
+            'BOTO_CONFIG': cls.botofile.string,
+            'STORAGE_BACKUP': cls.storage_backup,
         }
-        
+
+    @classmethod
+    def get_boto_values(cls):
+        t = "[Credentials]\n"
+        if cls.s3_key_id:
+            t += f"aws_access_key_id = {cls.s3_key_id}\n"
+            t += f"aws_secret_access_key = {cls.s3_secret}\n"
+        if cls.gauth.exists():
+            t += f"gs_service_key_file = {cls.gauth.as_posix()}\n"
+        t += "\n[Boto]\n"
+        t += "https_validate_certificates = True\n"
+        t += "\n[GSUtil]\n"
+        t += "content_language = en\n"
+        t += "default_api_version = 2\n"
+        if cls.gproject:
+            t+= f"default_project_id = {cls.gproject}\n"
+        return t
     
     @classmethod
     def get_envfile_values(cls):
@@ -415,6 +451,11 @@ export MINIO_MOUNT_PATH={cls.minio_mount_path}
 export MINIO_ENDPOINT={cls.minio_endpoint}
 export MINIO_ACCESS_KEY={cls.minio_key_id}
 export MINIO_SECRET_KEY={cls.minio_secret}
+
+export BOTO_PATH={cls.botofile.string}
+export BOTO_CONFIG={cls.botofile.string}
+
+export STORAGE_BACKUP={cls.storage_backup}
 """
         return t
     
@@ -437,7 +478,8 @@ export MINIO_SECRET_KEY={cls.minio_secret}
             'MINIO_MOUNT_PATH': cls.minio_mount_path,
             'MINIO_ENDPOINT': cls.minio_endpoint,
             'MINIO_ACCESS_KEY': cls.minio_key_id,
-            'MINIO_SECRET_KEY': cls.minio_secret            
+            'MINIO_SECRET_KEY': cls.minio_secret,
+            'STORAGE_BACKUP': cls.storage_backup
         }
     
     @classmethod
@@ -463,3 +505,6 @@ export MINIO_SECRET_KEY={cls.minio_secret}
         cls.minio_endpoint: str = Env.to_str('MINIO_ENDPOINT', cls.minio_endpoint)
         cls.minio_key_id: str = Env.to_str('MINIO_KEYID', cls.minio_key_id)
         cls.minio_secret: str = Env.to_str('MINIO_SECRET', cls.minio_secret)
+        ### Backup
+        cls.storage_backup: str = Env.to_str('STORAGE_BACKUP', cls.storage_backup)
+        
