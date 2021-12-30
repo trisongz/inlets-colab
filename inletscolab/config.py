@@ -328,7 +328,7 @@ class StorageConfig:
     minio_endpoint: str = Env.to_str('MINIO_ENDPOINT')
     minio_key_id: str = Env.to_str('MINIO_KEYID')
     minio_secret: str = Env.to_str('MINIO_SECRET')
-    ### Backups
+    ### Backups / Not Used ATM
     storage_backup: str = Env.to_str('STORAGE_BACKUP', '')
     
     @classmethod
