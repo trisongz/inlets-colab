@@ -318,7 +318,7 @@ class StorageConfig:
     minio_mount_path: str = Env.to_str('MINIO_MOUNT_PATH', '/content/minio')
     ## Auths
     ### GCP
-    gauth: PathLike = Env.to_json('GS_AUTH', 'GOOGLE_APPLICATION_CREDENTIALS', '/authz/adc.json')
+    gauth: PathLike = Env.to_json_b64('GS_AUTH', 'GOOGLE_APPLICATION_CREDENTIALS', '/authz/adc.json')
     gproject: str = Env.to_str('GS_PROJECT')
     ### AWS
     s3_key_id: str = Env.to_str_env('AWS_KEYID', 'AWS_ACCESS_KEY_ID', '')
@@ -496,7 +496,7 @@ export STORAGE_BACKUP={cls.storage_backup}
         cls.gs_mount_path: str = Env.to_str('GS_MOUNT_PATH', cls.gs_mount_path)
         cls.minio_mount_path: str = Env.to_str('MINIO_MOUNT_PATH', cls.minio_mount_path)
         ### GCP
-        cls.gauth: Type(Path) = Env.to_json('GS_AUTH', 'GOOGLE_APPLICATION_CREDENTIALS', cls.gauth.as_posix())
+        cls.gauth: Type(Path) = Env.to_json_b64('GS_AUTH', 'GOOGLE_APPLICATION_CREDENTIALS', cls.gauth.as_posix())
         ### AWS
         cls.s3_key_id: str = Env.to_str_env('AWS_KEYID', 'AWS_ACCESS_KEY_ID', cls.s3_key_id)
         cls.s3_secret: str = Env.to_str_env('AWS_SECRET', 'AWS_SECRET_ACCESS_KEY', cls.s3_secret)
