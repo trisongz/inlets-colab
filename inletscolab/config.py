@@ -41,7 +41,7 @@ class InletsConfig:
     tunnel_host: str = Env.to_str('INLETS_TUNNEL_HOST', '')
     server_host: str = Env.to_str('INLETS_SERVER_HOST', '')
     server_port: int = Env.to_int('INLETS_SERVER_PORT', 8123)
-    client_host: str = Env.to_str('INLETS_CLIENT_HOST', 'localhost')
+    client_host: str = Env.to_str('INLETS_CLIENT_HOST', '127.0.0.1')
     client_port: int = Env.to_int('INLETS_CLIENT_PORT', 7070)
     domain_name: str = Env.to_str('INLETS_DOMAIN', 'localhost')
     is_cluster: bool = Env.to_bool('INLETS_CLUSTER', 'true')
@@ -258,7 +258,7 @@ class ServerConfig:
     @classmethod
     def get_codeserver_cmd(cls):
         password = cls.get_code_password()
-        if password: cls.password
+        if password: cls.password = password
         return f'bash {cls.cs_exec_script.string} "{cls.host}:{cls.port}" "{cls.password}"'
         
     @classmethod
