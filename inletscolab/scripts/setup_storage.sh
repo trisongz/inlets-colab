@@ -85,6 +85,7 @@ format_juicefs() {
             --storage gs \
             --bucket $GS_BUCKET \
             --compress zstd \
+            --no-update \
             redis://127.0.0.1:6379/0 \
             colab
     fi
@@ -97,6 +98,7 @@ format_juicefs() {
             --secret-key $AWS_SECRET_ACCESS_KEY \
             --bucket $S3_BUCKET_ENDPOINT \
             --compress zstd \
+            --no-update \
             redis://127.0.0.1:6379/1 \
             colab
     fi
@@ -109,6 +111,7 @@ format_juicefs() {
             --access-key $MINIO_ACCESS_KEY \
             --secret-key $MINIO_SECRET_KEY \
             --compress zstd \
+            --no-update \
             redis://127.0.0.1:6379/2 \
             colab
     fi
@@ -123,6 +126,7 @@ mount_storagefs() {
             --no-usage-report \
             --writeback \
             --cache-dir /content/cache/.juicefs/gs \
+            --log /content/cache/juicefs_gs.log \
             -o allow_other,writeback_cache \
             redis://127.0.0.1:6379/0 \
             $GS_MOUNT_PATH
@@ -136,6 +140,7 @@ mount_storagefs() {
             --no-usage-report \
             --writeback \
             --cache-dir /content/cache/.juicefs/s3 \
+            --log /content/cache/juicefs_s3.log \
             -o allow_other,writeback_cache \
             redis://127.0.0.1:6379/1 \
             $S3_MOUNT_PATH
@@ -149,6 +154,7 @@ mount_storagefs() {
             --no-usage-report \
             --writeback \
             --cache-dir /content/cache/.juicefs/minio \
+            --log /content/cache/juicefs_minio.log \
             -o allow_other,writeback_cache \
             redis://127.0.0.1:6379/2 \
             $MINIO_MOUNT_PATH
@@ -158,12 +164,13 @@ mount_storagefs() {
 
 install_prereqs
 install_juicefs
+
 ## Attempt to restore backupfile if redis file doesnt exist
 if [[ ! -f /content/cache/redis/appendonly.aof ]]; then
     restore_backupfile
+else
+    start_redis
+    format_juicefs
 fi
-
-start_redis
-format_juicefs
 mount_storagefs
 
