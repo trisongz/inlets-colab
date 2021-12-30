@@ -78,10 +78,8 @@ mount_miniofs() {
         else
             echo "Mounting Minio Bucket $MINIO_BUCKET to $MINIO_MOUNT_PATH"
             s3fs "$MINIO_BUCKET" "$MINIO_MOUNT_PATH" -o passwd_file=/etc/passwd-miniofs -o url="$MINIO_ENDPOINT/" -o use_path_request_style
-            
         fi
     fi
-
 }
 
 install_storage() {
