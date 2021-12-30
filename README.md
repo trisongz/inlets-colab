@@ -8,7 +8,7 @@
 ### Features
 
 - [x] Optimized for Inlets/InletsPro
-- [x] Use your own Custom `CodeServer` Domain 
+- [x] Use your own Custom `CodeServer` Domain `i.e. https://colab.yourdomain.com`
 - [x] Quick Deployment
 - [x] Notebook/CLI Support
 - [x] GDrive Integration
